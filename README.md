@@ -14,7 +14,7 @@ COPY init.sql /docker-entrypoint-initdb.d/
 
 EXPOSE 5432
 ```
-- Arquivo sql para caga de dados (`init.js`)
+- Arquivo sql para caga de dados (`init.sql`)
 ```SQL
 CREATE TABLE proprietarios (
     cpf VARCHAR(14) PRIMARY KEY,

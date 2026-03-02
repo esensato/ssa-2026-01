@@ -1,7 +1,7 @@
 # ssa-2026-01
 Self Service Analytics
 ### Ambiente Colab
-- Acessar [Colab](https://colab.research.google.com/))
+- Acessar [Colab](https://colab.research.google.com/)
 ### Ambiente Codespages
 - Acessar [Codespaces](https://github.com/features/codespaces?locale=pt-BR)
 ### Dockerfile PostgreSQL

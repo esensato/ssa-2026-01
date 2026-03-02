@@ -138,4 +138,24 @@ df_final = df_imoveis.merge(
     how="left"
 )
 ```
+### Exemplo Básico Airflow
+```dockerfile
+FROM apache/airflow:2.8.1
 
+USER airflow
+
+RUN pip install --no-cache-dir pandas
+
+ENV AIRFLOW__CORE__LOAD_EXAMPLES=False
+
+EXPOSE 8080
+```
+- Montagem e execução do container
+```bash
+docker build -t airflow .
+docker run -d -p 8080:8080 -v $(pwd)/dags:/opt/airflow/dags -v $(pwd)/dados:/opt/airflow/dados --name airflow airflow standalone
+```
+- Criar usuário administrador
+```bash
+docker exec -it airflow airflow users create --username airflow --firstname Airflow --lastname User --role Admin --email airflow@email.com --password airflow
+```

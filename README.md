@@ -91,21 +91,21 @@ show collections
 db.imoveis.find().pretty()
 exit
 ```
-
+### Acessando Bases com Python
+- Instalar pacotes necessários
+```bash
+pip install sqlalchemy psycopg2-binary
+pip install pymongo
+pip install pandas
+```
+- Realizar o *join* com o **Python**
 ```python
-import psycopg2
+from sqlalchemy import create_engine
 from pymongo import MongoClient
 import pandas as pd
 
-conn = psycopg2.connect(
-    host="localhost",
-    database="imobiliaria",
-    user="admin",
-    password="admin123"
-)
-
-df_proprietarios = pd.read_sql("SELECT * FROM proprietarios", conn)
-conn.close()
+engine = create_engine("postgresql+psycopg2://admin:admin123@localhost:5432/imobiliaria")
+df_proprietarios = pd.read_sql("SELECT * FROM proprietarios", engine)
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client["imobiliaria"]
@@ -124,6 +124,7 @@ df_final = df_imoveis.merge(
 
 print(df_final.head())
 ```
+- Problema encontrado: alguns CPFs podem estar fora de padrão...
 ```python
 def limpar_cpf(cpf):
     return cpf.replace(".", "").replace("-", "")

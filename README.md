@@ -44,6 +44,12 @@ INSERT INTO proprietarios (cpf, nome, cidade) VALUES
 docker build -t bd-postgres .
 docker run -d -p 5432:5432 --name bd-postgres bd-postgres
 ```
+- Teste final
+```bash
+docker exec -it bd-postgres psql -U admin -d imobiliaria
+select * from proprietarios;
+exit
+```
 ### Dockerfile MongoDB
 ```dockerfile
 FROM mongo:7
@@ -76,6 +82,16 @@ db.imoveis.insertMany([
 docker build -t bd-mongo .
 docker run -d -p 27017:27017 --name bd-mongo bd-mongo
 ```
+- Teste final
+```bash
+docker exec -it bd-mongo mongosh
+show dbs
+use imobiliaria
+show collections
+db.imoveis.find().pretty()
+exit
+```
+
 ```python
 import psycopg2
 from pymongo import MongoClient

@@ -159,3 +159,64 @@ docker run -d -p 8080:8080 -v $(pwd)/dags:/opt/airflow/dags -v $(pwd)/dados:/opt
 ```bash
 docker exec -it airflow airflow users create --username airflow --firstname Airflow --lastname User --role Admin --email airflow@email.com --password airflow
 ```
+- Criar um arquivo de exemplo (`vendas.csv`) com dados de venda dentro do diretório `dados`
+```csv
+produto,quantidade,preco_unitario
+A,2,10
+B,1,20
+A,3,10
+C,4,5
+B,2,20
+```
+- Criar o **DAG** (`pipeline_vendas.py`) dentro do diretório `dags`
+```python
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from datetime import datetime
+import pandas as pd
+
+CAMINHO_ARQUIVO = "/opt/airflow/dados/vendas.csv"
+CAMINHO_SAIDA = "/opt/airflow/dados/resultado.csv"
+
+default_args = {
+    "start_date": datetime(2024, 1, 1),
+}
+
+with DAG(
+    dag_id="pipeline_vendas_simples",
+    default_args=default_args,
+    schedule_interval=None,
+    catchup=False,
+) as dag:
+
+    def ler_csv(**context):
+        df = pd.read_csv(CAMINHO_ARQUIVO)
+        context["ti"].xcom_push(key="dados", value=df.to_json())
+
+    def calcular_total(**context):
+        json_data = context["ti"].xcom_pull(key="dados")
+        df = pd.read_json(json_data)
+
+        df["total"] = df["quantidade"] * df["preco_unitario"]
+
+        resultado = (
+            df.groupby("produto")["total"]
+            .sum()
+            .reset_index()
+            .rename(columns={"total": "total_vendas"})
+        )
+
+        resultado.to_csv(CAMINHO_SAIDA, index=False)
+
+    task1 = PythonOperator(
+        task_id="ler_csv",
+        python_callable=ler_csv
+    )
+
+    task2 = PythonOperator(
+        task_id="calcular_total",
+        python_callable=calcular_total
+    )
+
+    task1 >> task2
+```

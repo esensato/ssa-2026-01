@@ -76,3 +76,49 @@ db.imoveis.insertMany([
 docker build -t bd-mongo .
 docker run -d -p 27017:27017 --name bd-mongo bd-mongo
 ```
+```python
+import psycopg2
+from pymongo import MongoClient
+import pandas as pd
+
+conn = psycopg2.connect(
+    host="localhost",
+    database="imobiliaria",
+    user="admin",
+    password="admin123"
+)
+
+df_proprietarios = pd.read_sql("SELECT * FROM proprietarios", conn)
+conn.close()
+
+client = MongoClient("mongodb://localhost:27017/")
+db = client["imobiliaria"]
+
+imoveis = list(db.imoveis.find())
+df_imoveis = pd.DataFrame(imoveis)
+
+df_imoveis.drop(columns=["_id"], inplace=True)
+
+df_final = df_imoveis.merge(
+    df_proprietarios,
+    left_on="cpf_proprietario",
+    right_on="cpf",
+    how="left"
+)
+
+print(df_final.head())
+```
+```python
+def limpar_cpf(cpf):
+    return cpf.replace(".", "").replace("-", "")
+
+df_proprietarios["cpf_limpo"] = df_proprietarios["cpf"].apply(limpar_cpf)
+df_imoveis["cpf_limpo"] = df_imoveis["cpf_proprietario"].apply(limpar_cpf)
+
+df_final = df_imoveis.merge(
+    df_proprietarios,
+    on="cpf_limpo",
+    how="left"
+)
+```
+

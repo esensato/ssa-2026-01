@@ -172,6 +172,8 @@ res = conn.getresponse()
 data = res.read()
 
 print(json.loads(data.decode("utf-8"))["token"])
+
+token = json.loads(data.decode("utf-8"))["token"]
 ```
 - Armazenar o *token* em uma variável
 - Efetuar uma consulta *SQL* ao banco de dados e obter o `id` da execução (assíncrona)
@@ -198,9 +200,10 @@ res = conn.getresponse()
 data = res.read()
 
 print(json.loads(data.decode("utf-8"))["id"])
+
+id = data.decode("utf-8"))["id"]
 ```
-- Armazenar o *token* em uma variável
-- Efetuar uma consulta *SQL* ao banco de dados e obter o `id` da execução (assíncrona)
+- Obter o restulado final da execução (atualizar o `id`)
 ```python
 import http.client
 import ssl
@@ -210,20 +213,19 @@ context = ssl._create_unverified_context()
 
 conn = http.client.HTTPSConnection(url, context=context)
 
-payload = {"commands":"select * from disciplinas", "separator":";","stop_on_error":"no"}
-
 headers = {
     'content-type': "application/json",
     'authorization': f"Bearer {token}",
      'x-deployment-id': deployment_id
 }
 
-conn.request("POST", "/dbapi/v4/sql_jobs", json.dumps(payload), headers)
+conn.request("GET", f"/dbapi/v4/sql_jobs/{id}", headers=headers)
 
 res = conn.getresponse()
 data = res.read()
 
-print(json.loads(data.decode("utf-8"))["id"])
+print(data.decode("utf-8"))
+```
 ```
 ### Exemplo Básico Airflow
 ```dockerfile

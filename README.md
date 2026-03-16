@@ -140,6 +140,91 @@ df_final = df_imoveis.merge(
     how="left"
 )
 ```
+### Conectar DB2 na Cloud
+- Para referência à API clicar [aqui](https://cloud.ibm.com/apidocs/db2-on-cloud/db2-on-cloud-v4)
+- Definir as variáveis para a obter o token de conexão
+```python
+url = ""
+userid = ""
+password = ""
+deployment_id = ""
+```
+- Obter o token (exemplo em *python*)
+```python
+import http.client
+import ssl
+import json
+
+context = ssl._create_unverified_context()
+
+conn = http.client.HTTPSConnection(url, context=context)
+
+payload = {"userid":userid,"password":password}
+
+headers = {
+    'content-type': "application/json",
+    'x-deployment-id': deployment_id
+    }
+
+conn.request("POST", "/dbapi/v4/auth/tokens", json.dumps(payload), headers)
+
+res = conn.getresponse()
+data = res.read()
+
+print(json.loads(data.decode("utf-8"))["token"])
+```
+- Armazenar o *token* em uma variável
+- Efetuar uma consulta *SQL* ao banco de dados e obter o `id` da execução (assíncrona)
+```python
+import http.client
+import ssl
+import json
+
+context = ssl._create_unverified_context()
+
+conn = http.client.HTTPSConnection(url, context=context)
+
+payload = {"commands":"select * from modelos", "separator":";","stop_on_error":"no"}
+
+headers = {
+    'content-type': "application/json",
+    'authorization': f"Bearer {token}",
+     'x-deployment-id': deployment_id
+}
+
+conn.request("POST", "/dbapi/v4/sql_jobs", json.dumps(payload), headers)
+
+res = conn.getresponse()
+data = res.read()
+
+print(json.loads(data.decode("utf-8"))["id"])
+```
+- Armazenar o *token* em uma variável
+- Efetuar uma consulta *SQL* ao banco de dados e obter o `id` da execução (assíncrona)
+```python
+import http.client
+import ssl
+import json
+
+context = ssl._create_unverified_context()
+
+conn = http.client.HTTPSConnection(url, context=context)
+
+payload = {"commands":"select * from disciplinas", "separator":";","stop_on_error":"no"}
+
+headers = {
+    'content-type': "application/json",
+    'authorization': f"Bearer {token}",
+     'x-deployment-id': deployment_id
+}
+
+conn.request("POST", "/dbapi/v4/sql_jobs", json.dumps(payload), headers)
+
+res = conn.getresponse()
+data = res.read()
+
+print(json.loads(data.decode("utf-8"))["id"])
+```
 ### Exemplo Básico Airflow
 ```dockerfile
 FROM apache/airflow:2.8.1

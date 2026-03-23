@@ -407,23 +407,43 @@ FROM data_quality_metrics
 ORDER BY data_execucao DESC
 LIMIT 1;
 ```
-### Exemplo Básico Airflow
-```dockerfile
-FROM apache/airflow:2.8.1
-
-USER airflow
-
-RUN pip install --no-cache-dir pandas
-
-ENV AIRFLOW__CORE__LOAD_EXAMPLES=False
-
-EXPOSE 8080
-```
-- Montagem e execução do container
+### Instalar Airflow
+- Criar uma pasta e obter o `docker-compose.yaml` (referência [airflow.apache.org](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html)
 ```bash
-docker build -t airflow .
-docker run -d -p 8080:8080 -v $(pwd)/dags:/opt/airflow/dags -v $(pwd)/dados:/opt/airflow/dados --name airflow airflow standalone
+mkdir airflow
+cd airflow
+curl -LfO 'https://airflow.apache.org/docs/apache-airflow/3.1.8/docker-compose.yaml'
 ```
+- Abrir o arquivo `docker-compose.yaml` e alterar / incluir
+```yaml
+AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://localhost:8080/execution/'
+# incluir
+AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL: 5 
+AIRFLOW__CORE__MIN_SERIALIZED_DAG_UPDATE_INTERVAL: 5
+AIRFLOW__CORE__MIN_SERIALIZED_DAG_FETCH_INTERVAL: 5
+```
+- Criar configurações iniciais
+```bash
+mkdir -p ./dags ./logs ./plugins ./config
+echo -e "AIRFLOW_UID=$(id -u)" > .env
+```
+- Iniciar o banco de dados do `airflow`
+```bash
+docker-compose up airflow-init
+```
+- Iniciar o **airflow**
+```bash
+docker-compose up -d
+```
+- 
+- Acesso via linha de comando
+```bash
+curl -LfO 'https://airflow.apache.org/docs/apache-airflow/3.1.8/airflow.sh'
+chmod +x airflow.sh
+./airflow.sh info
+```
+- Acesso pelo navegador na porta `8080` (pode ser necessário alterar o parâmetro `next` para `localhost:8080` quando executado do **codespace**)
 - Criar usuário administrador
 ```bash
 docker exec -it airflow airflow users create --username airflow --firstname Airflow --lastname User --role Admin --email airflow@email.com --password airflow

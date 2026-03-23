@@ -283,6 +283,7 @@ volumes:
 ```bash
 docker-compose up -d
 ```
+- Abrir o navegador na porta `3000` (**Grafana**) e informar o usuário e senha `admin` / `admin`
 - Teste de conexão com **Python** e **PostgreSQL**
 - Instalar o pacote `psycopg2-binary`
 ```bash

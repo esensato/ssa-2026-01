@@ -227,6 +227,7 @@ data = res.read()
 print(data.decode("utf-8"))
 ```
 ### Grafana
+- Acessar [Codespaces](https://github.com/features/codespaces?locale=pt-BR)
 - Criar o arquivo `docker-compose.yaml`
 ```yaml
 version: '3.8'

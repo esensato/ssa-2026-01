@@ -230,8 +230,6 @@ print(data.decode("utf-8"))
 - Acessar [Codespaces](https://github.com/features/codespaces?locale=pt-BR)
 - Criar o arquivo `docker-compose.yaml`
 ```yaml
-version: '3.8'
-
 services:
 
   postgres:
@@ -279,6 +277,42 @@ volumes:
   postgres_data:
   grafana_data:
   pgadmin_data:
+```
+- Criar as imagens e *containers*
+```bash
+docker-compose up -d
+```
+- Teste de conexão com **Python** e **PostgreSQL**
+- Instalar o pacote `psycopg2-binary`
+```bash
+pip install psycopg2-binary
+```
+- Código para teste
+```python
+import psycopg2
+
+try:
+    conn = psycopg2.connect(
+        host="localhost",
+        port="5432",
+        database="metrics",
+        user="grafana",
+        password="grafana"
+    )
+
+    print("Conexão realizada com sucesso!")
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT version();")
+    version = cursor.fetchone()
+
+    print("Versão do PostgreSQL:", version)
+
+    cursor.close()
+    conn.close()
+
+except Exception as e:
+    print("Erro ao conectar:", e)
 ```
 ### Exemplo Básico Airflow
 ```dockerfile

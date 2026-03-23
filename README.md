@@ -267,6 +267,7 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_WTF_CSRF_ENABLED: "False"
     ports:
       - "5050:80"
     volumes:
@@ -313,6 +314,98 @@ try:
 
 except Exception as e:
     print("Erro ao conectar:", e)
+```
+### Criar o Schema
+- Configurar a conexão com o **pgadmin** informando o *hostname* **postgres**
+- Criar a tabela para armazenar as métricas de qualidade
+```sql
+CREATE TABLE data_quality_metrics (
+    id SERIAL PRIMARY KEY,
+    data_execucao TIMESTAMP,
+    completeness NUMERIC(5,2),
+    validity NUMERIC(5,2),
+    consistency NUMERIC(5,2),
+    uniqueness NUMERIC(5,2),
+    accuracy NUMERIC(5,2),
+    timeliness NUMERIC(5,2),
+    integrity NUMERIC(5,2),
+    total_registros INT
+);
+```
+- Função para inserir dados das métricas calculadas
+```python
+import psycopg2
+from datetime import datetime
+
+def inserir_metrica_bd (completeness,
+    validity,
+    consistency,
+    uniqueness,
+    accuracy,
+    timeliness,
+    integrity,
+    total):
+
+    conn = psycopg2.connect(
+        host="localhost",
+        database="metrics",
+        user="grafana",
+        password="grafana"
+    )
+
+    cursor = conn.cursor()
+
+    insert_sql = """
+    INSERT INTO data_quality_metrics (
+        data_execucao,
+        completeness,
+        validity,
+        consistency,
+        uniqueness,
+        accuracy,
+        timeliness,
+        integrity,
+        total_registros
+    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+
+    cursor.execute(insert_sql, (
+        datetime.now(),
+        completeness,
+        validity,
+        consistency,
+        uniqueness,
+        accuracy,
+        timeliness,
+        integrity,
+        total
+    ))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+```
+### Criação dos Dashboards
+- Consulta para *timeline*
+```sql
+SELECT
+  data_execucao AS time,
+  completeness,
+  validity,
+  consistency,
+  uniqueness,
+  accuracy,
+  timeliness,
+  integrity
+FROM data_quality_metrics
+ORDER BY time;
+```
+- Consulta para *gauge* (exibindo sempre o último valor, por exemplo, *completeness*)
+```sql
+SELECT completeness
+FROM data_quality_metrics
+ORDER BY data_execucao DESC
+LIMIT 1;
 ```
 ### Exemplo Básico Airflow
 ```dockerfile

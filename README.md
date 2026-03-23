@@ -408,7 +408,7 @@ ORDER BY data_execucao DESC
 LIMIT 1;
 ```
 ### Instalar Airflow
-- Criar uma pasta e obter o `docker-compose.yaml` (referência [airflow.apache.org](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html)
+- Criar uma pasta e obter o `docker-compose.yaml` (referência [airflow.apache.org](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html))
 ```bash
 mkdir airflow
 cd airflow
@@ -444,9 +444,25 @@ chmod +x airflow.sh
 ./airflow.sh info
 ```
 - Acesso pelo navegador na porta `8080` (pode ser necessário alterar o parâmetro `next` para `localhost:8080` quando executado do **codespace**)
-- Criar usuário administrador
-```bash
-docker exec -it airflow airflow users create --username airflow --firstname Airflow --lastname User --role Admin --email airflow@email.com --password airflow
+- Testando a primeira **DAG**
+```python
+import pendulum
+from airflow import DAG
+from airflow.operators.bash import BashOperator
+
+with DAG(
+    dag_id="hello_dag",
+    description="DAG Hello World!",
+    schedule=None,
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    catchup=False,
+    tags=["hello","world"]
+) as dag:
+    task1 = BashOperator(task_id='task-1', bash_command="sleep 3")
+    task2 = BashOperator(task_id='task-2', bash_command="echo Hello DAG!!!")
+    task3 = BashOperator(task_id='task-3', bash_command="sleep 5")    
+    task4 = BashOperator(task_id='task-4', bash_command="exit 0")  
+    task1 >> task2 >> task3 >> task4
 ```
 - Criar um arquivo de exemplo (`vendas.csv`) com dados de venda dentro do diretório `dados`
 ```csv
@@ -459,33 +475,29 @@ B,2,20
 ```
 - Criar o **DAG** (`pipeline_vendas.py`) dentro do diretório `dags`
 ```python
+import pendulum
 from airflow import DAG
-from airflow.operators.python import PythonOperator
-from datetime import datetime
+from airflow.providers.standard.operators.python import PythonOperator
 import pandas as pd
 
-CAMINHO_ARQUIVO = "/opt/airflow/dados/vendas.csv"
-CAMINHO_SAIDA = "/opt/airflow/dados/resultado.csv"
-
-default_args = {
-    "start_date": datetime(2024, 1, 1),
-}
+CAMINHO_ARQUIVO = "/opt/airflow/dags/vendas.csv"
+CAMINHO_SAIDA = "/opt/airflow/dags/resultado.csv"
 
 with DAG(
-    dag_id="pipeline_vendas_simples",
-    default_args=default_args,
-    schedule_interval=None,
+    dag_id="vendas_dag",
+    description="Vendas",
+    schedule=None,
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
     catchup=False,
+    tags=["pipeline","vendas"]
 ) as dag:
-
-    def ler_csv(**context):
+    def ler_csv():
         df = pd.read_csv(CAMINHO_ARQUIVO)
-        context["ti"].xcom_push(key="dados", value=df.to_json())
+        return df
 
     def calcular_total(**context):
-        json_data = context["ti"].xcom_pull(key="dados")
-        df = pd.read_json(json_data)
 
+        df = context['ti'].xcom_pull(task_ids='ler_csv')
         df["total"] = df["quantidade"] * df["preco_unitario"]
 
         resultado = (

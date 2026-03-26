@@ -1,4 +1,4 @@
-# ssa-2026-01
+<img width="130" height="39" alt="image" src="https://github.com/user-attachments/assets/df1e8f1f-30b4-4111-bca5-e8ac1e58cb33" /># ssa-2026-01
 Self Service Analytics
 ### Ambiente Colab
 - Acessar [Colab](https://colab.research.google.com/)
@@ -408,6 +408,32 @@ FROM data_quality_metrics
 ORDER BY data_execucao DESC
 LIMIT 1;
 ```
+### Exercício
+- Criar uma tabela para conter os tipos de exame
+```sql
+CREATE TABLE tipo_exame (
+    id SERIAL PRIMARY KEY,
+    tipo VARCHAR(100)
+);
+```
+- Inserir os tipos
+```sql
+INSERT INTO tipo_exame (tipo) VALUES ('HEMOGRAMA');
+INSERT INTO tipo_exame (tipo) VALUES ('RAIO_X');
+INSERT INTO tipo_exame (tipo) VALUES ('ULTRASSOM');
+INSERT INTO tipo_exame (tipo) VALUES ('TOMOGRAFIA');
+INSERT INTO tipo_exame (tipo) VALUES ('RESSONANCIA');
+```
+- Obter os `datasets` (no codespaces)
+```bash
+wget https://raw.githubusercontent.com/esensato/ssa-2026-01/refs/heads/main/exames_hospital_A.csv
+wget https://raw.githubusercontent.com/esensato/ssa-2026-01/refs/heads/main/exames_hospital_B.csv
+wget https://raw.githubusercontent.com/esensato/ssa-2026-01/refs/heads/main/exames_hospital_C.csv
+```
+```bash
+pip install sqlalchemy psycopg2-binary
+```
+
 ### Instalar Airflow
 - Criar uma pasta e obter o `docker-compose.yaml` (referência [airflow.apache.org](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html))
 ```bash

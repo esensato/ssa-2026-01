@@ -464,7 +464,6 @@ docker-compose up airflow-init
 ```bash
 docker-compose up -d
 ```
-- 
 - Acesso via linha de comando
 ```bash
 curl -LfO 'https://airflow.apache.org/docs/apache-airflow/3.1.8/airflow.sh'

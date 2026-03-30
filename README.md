@@ -491,6 +491,147 @@ with DAG(
     task4 = BashOperator(task_id='task-4', bash_command="exit 0")  
     task1 >> task2 >> task3 >> task4
 ```
+### Triggers
+- Exemplo `ONE_FAILED`
+```python
+import pendulum
+from airflow import DAG
+from airflow.operators.bash import BashOperator
+from airflow.utils.trigger_rule import TriggerRule
+
+with DAG(
+    dag_id="trigger_one_failed",
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    schedule=None,
+    catchup=False
+) as dag:
+
+    sucesso = BashOperator(
+        task_id="sucesso",
+        bash_command="echo OK"
+    )
+
+    falha = BashOperator(
+        task_id="falha",
+        bash_command="exit 1"
+    )
+
+    alerta = BashOperator(
+        task_id="alerta",
+        bash_command="echo 'Uma task falhou!'",
+        trigger_rule=TriggerRule.ONE_FAILED
+    )
+
+    [sucesso, falha] >> alerta
+```
+- Exemplo `ALL_FAILED`
+```python
+with DAG(
+    dag_id="trigger_all_failed",
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    schedule=None,
+    catchup=False
+) as dag:
+
+    falha1 = BashOperator(
+        task_id="falha1",
+        bash_command="exit 1"
+    )
+
+    falha2 = BashOperator(
+        task_id="falha2",
+        bash_command="exit 1"
+    )
+
+    somente_se_tudo_quebrar = BashOperator(
+        task_id="all_failed_task",
+        bash_command="echo 'Tudo falhou!'",
+        trigger_rule=TriggerRule.ALL_FAILED
+    )
+
+    [falha1, falha2] >> somente_se_tudo_quebrar
+```
+- Exemplo `ONE_SUCESS`
+```python
+with DAG(
+    dag_id="trigger_one_success",
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    schedule=None,
+    catchup=False
+) as dag:
+
+    ok = BashOperator(
+        task_id="ok",
+        bash_command="echo OK"
+    )
+
+    erro = BashOperator(
+        task_id="erro",
+        bash_command="exit 1"
+    )
+
+    continua = BashOperator(
+        task_id="continua",
+        bash_command="echo 'Pelo menos uma funcionou!'",
+        trigger_rule=TriggerRule.ONE_SUCCESS
+    )
+
+    [ok, erro] >> continua
+```
+- Exemplo `NONE_FAILED`
+```python
+with DAG(
+    dag_id="trigger_none_failed",
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    schedule=None,
+    catchup=False
+) as dag:
+
+    t1 = BashOperator(
+        task_id="t1",
+        bash_command="echo OK"
+    )
+
+    t2 = BashOperator(
+        task_id="t2",
+        bash_command="echo OK"
+    )
+
+    final = BashOperator(
+        task_id="final",
+        bash_command="echo 'Nenhuma falhou!'",
+        trigger_rule=TriggerRule.NONE_FAILED
+    )
+
+    [t1, t2] >> final
+```
+- Exemplo `ALL_DONE`
+```python
+with DAG(
+    dag_id="trigger_all_done",
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    schedule=None,
+    catchup=False
+) as dag:
+
+    t1 = BashOperator(
+        task_id="t1",
+        bash_command="exit 1"
+    )
+
+    t2 = BashOperator(
+        task_id="t2",
+        bash_command="echo OK"
+    )
+
+    sempre = BashOperator(
+        task_id="sempre_executa",
+        bash_command="echo 'Executo sempre!'",
+        trigger_rule=TriggerRule.ALL_DONE
+    )
+
+    [t1, t2] >> sempre
+```
 - Criar um arquivo de exemplo (`vendas.csv`) com dados de venda dentro do diretório `dados`
 ```csv
 produto,quantidade,preco_unitario

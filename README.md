@@ -1,4 +1,4 @@
-<img width="130" height="39" alt="image" src="https://github.com/user-attachments/assets/df1e8f1f-30b4-4111-bca5-e8ac1e58cb33" /># ssa-2026-01
+# ssa-2026-01
 Self Service Analytics
 ### Ambiente Colab
 - Acessar [Colab](https://colab.research.google.com/)

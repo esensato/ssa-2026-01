@@ -433,7 +433,7 @@ wget https://raw.githubusercontent.com/esensato/ssa-2026-01/refs/heads/main/exam
 ```bash
 pip install sqlalchemy psycopg2-binary
 ```
-
+- Utilizar como base o *script* 
 ### Instalar Airflow
 - Criar uma pasta e obter o `docker-compose.yaml` (referência [airflow.apache.org](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html))
 ```bash

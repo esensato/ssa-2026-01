@@ -633,6 +633,52 @@ with DAG(
     [t1, t2] >> sempre
 ```
 ### Principais Operadores
+- Exemplo de `ShortCircuitOperator`
+```python
+import os
+import pendulum
+from airflow import DAG
+from airflow.operators.python import PythonOperator, ShortCircuitOperator
+
+def verificar_arquivo():
+    caminho = "/tmp/dados.csv"
+    
+    existe = os.path.exists(caminho)
+    print(f"Arquivo existe? {existe}")
+    
+    return existe
+
+def processar():
+    print("Processando arquivo...")
+
+def finalizar():
+    print("Finalizando pipeline...")
+
+with DAG(
+    dag_id="short_circuit_example",
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    schedule=None,
+    catchup=False,
+    tags=["controle_fluxo"]
+) as dag:
+
+    checar = ShortCircuitOperator(
+        task_id="verificar_arquivo",
+        python_callable=verificar_arquivo
+    )
+
+    processar_task = PythonOperator(
+        task_id="processar",
+        python_callable=processar
+    )
+
+    finalizar_task = PythonOperator(
+        task_id="finalizar",
+        python_callable=finalizar
+    )
+
+    checar >> processar_task >> finalizar_task
+```
 - Exemplo de `SimpleHttpOperator`
 ```python
 import pendulum
@@ -669,6 +715,31 @@ with DAG(
     )
 
     get_posts >> processar
+```
+- Exemplo `SQLCheckOperator`
+```python
+import pendulum
+from airflow import DAG
+from airflow.providers.common.sql.operators.sql import SQLCheckOperator
+
+with DAG(
+    dag_id="sql_check_example",
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    schedule=None,
+    catchup=False,
+    tags=["data_quality"]
+) as dag:
+
+    check_regra = SQLCheckOperator(
+        task_id="check_regra_negocio",
+        conn_id="postgres_default",
+        sql="""
+        SELECT COUNT(*) = 0
+        FROM atendimentos
+        WHERE valor_plano IS NOT NULL
+          AND valor_particular IS NOT NULL
+        """
+    )
 ```
 - Exemplo `PostgresOperator`
 ```python

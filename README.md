@@ -433,7 +433,8 @@ wget https://raw.githubusercontent.com/esensato/ssa-2026-01/refs/heads/main/exam
 ```bash
 pip install sqlalchemy psycopg2-binary
 ```
-- Utilizar como base o *script* 
+- Utilizar como base o *script* [metricas.py](https://raw.githubusercontent.com/esensato/ssa-2026-01/refs/heads/main/metricas.py)
+- Criar uma tabela para armazenar o total de registros processados, o total de falhas e o total de sucessos e criar 3 *gauges* no **Grafana** para representar os valores na forma de um *dashboard*
 ### Instalar Airflow
 - Criar uma pasta e obter o `docker-compose.yaml` (referência [airflow.apache.org](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html))
 ```bash

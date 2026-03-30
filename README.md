@@ -491,6 +491,10 @@ with DAG(
     task4 = BashOperator(task_id='task-4', bash_command="exit 0")  
     task1 >> task2 >> task3 >> task4
 ```
+- Testando uma falha
+```python
+    task4 = BashOperator(task_id='task-4', bash_command="exit 1", retries=3)
+```
 ### Triggers
 - Exemplo `ONE_FAILED`
 ```python

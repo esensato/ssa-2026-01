@@ -640,7 +640,6 @@ from airflow import DAG
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.operators.python import PythonOperator
 
-# Função para tratar resposta
 def processar_resposta(**context):
     response = context['ti'].xcom_pull(task_ids='get_posts')
     print("Resposta da API:")
@@ -654,7 +653,6 @@ with DAG(
     tags=["http","api"]
 ) as dag:
 
-    # 🔹 Task 1 - chamada HTTP real
     get_posts = SimpleHttpOperator(
         task_id="get_posts",
         http_conn_id="jsonplaceholder_api",
@@ -665,13 +663,108 @@ with DAG(
         log_response=True
     )
 
-    # 🔹 Task 2 - processa resposta
     processar = PythonOperator(
         task_id="processar_resposta",
         python_callable=processar_resposta
     )
 
     get_posts >> processar
+```
+- Exemplo `PostgresOperator`
+```python
+import pendulum
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.providers.postgres.operators.postgres import PostgresOperator
+
+def calcular_metricas(**context):
+    metrics = {
+        "data_execucao": str(pendulum.now("America/Sao_Paulo")),
+        "completeness": 95.5,
+        "validity": 98.0,
+        "consistency": 92.3,
+        "uniqueness": 100.0,
+        "accuracy": 97.2,
+        "timeliness": 88.0,
+        "total_registros": 150
+    }
+    return metrics
+
+with DAG(
+    dag_id="postgres_metrics_example",
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    schedule=None,
+    catchup=False,
+    tags=["postgres","metrics"]
+) as dag:
+
+    calcular = PythonOperator(
+        task_id="calcular_metricas",
+        python_callable=calcular_metricas
+    )
+
+    inserir = PostgresOperator(
+        task_id="inserir_metricas",
+        postgres_conn_id="postgres_default",
+        sql="""
+        INSERT INTO data_quality_metrics (
+            data_execucao,
+            completeness,
+            validity,
+            consistency,
+            uniqueness,
+            accuracy,
+            timeliness,
+            integrity,
+            total_registros
+        ) VALUES (
+            '{{ ti.xcom_pull(task_ids="calcular_metricas")["data_execucao"] }}',
+            {{ ti.xcom_pull(task_ids="calcular_metricas")["completeness"] }},
+            {{ ti.xcom_pull(task_ids="calcular_metricas")["validity"] }},
+            {{ ti.xcom_pull(task_ids="calcular_metricas")["consistency"] }},
+            {{ ti.xcom_pull(task_ids="calcular_metricas")["uniqueness"] }},
+            {{ ti.xcom_pull(task_ids="calcular_metricas")["accuracy"] }},
+            {{ ti.xcom_pull(task_ids="calcular_metricas")["timeliness"] }},
+            0,
+            {{ ti.xcom_pull(task_ids="calcular_metricas")["total_registros"] }}
+        );
+        """
+    )
+
+    calcular >> inserir
+```
+- Exemplo `FileSensor`
+```python
+import pendulum
+from airflow import DAG
+from airflow.sensors.filesystem import FileSensor
+from airflow.operators.python import PythonOperator
+
+def processar_arquivo():
+    print("Arquivo encontrado! Processando dados...")
+
+with DAG(
+    dag_id="file_sensor_example",
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    schedule=None,
+    catchup=False,
+    tags=["sensor","file"]
+) as dag:
+
+    espera_arquivo = FileSensor(
+        task_id="espera_arquivo",
+        filepath="/tmp/dados.csv",
+        poke_interval=10,   # verifica a cada 10s
+        timeout=60,         # falha após 60s
+        mode="poke"         # modo padrão
+    )
+
+    processar = PythonOperator(
+        task_id="processar_arquivo",
+        python_callable=processar_arquivo
+    )
+
+    espera_arquivo >> processar
 ```
 - Criar um arquivo de exemplo (`vendas.csv`) com dados de venda dentro do diretório `dados`
 ```csv

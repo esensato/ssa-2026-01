@@ -632,6 +632,47 @@ with DAG(
 
     [t1, t2] >> sempre
 ```
+### Principais Operadores
+- Exemplo de `SimpleHttpOperator`
+```python
+import pendulum
+from airflow import DAG
+from airflow.providers.http.operators.http import SimpleHttpOperator
+from airflow.operators.python import PythonOperator
+
+# Função para tratar resposta
+def processar_resposta(**context):
+    response = context['ti'].xcom_pull(task_ids='get_posts')
+    print("Resposta da API:")
+    print(response[:200])  # imprime só parte
+
+with DAG(
+    dag_id="http_real_example",
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    schedule=None,
+    catchup=False,
+    tags=["http","api"]
+) as dag:
+
+    # 🔹 Task 1 - chamada HTTP real
+    get_posts = SimpleHttpOperator(
+        task_id="get_posts",
+        http_conn_id="jsonplaceholder_api",
+        endpoint="/posts",
+        method="GET",
+        headers={"Content-Type": "application/json"},
+        response_filter=lambda response: response.text,
+        log_response=True
+    )
+
+    # 🔹 Task 2 - processa resposta
+    processar = PythonOperator(
+        task_id="processar_resposta",
+        python_callable=processar_resposta
+    )
+
+    get_posts >> processar
+```
 - Criar um arquivo de exemplo (`vendas.csv`) com dados de venda dentro do diretório `dados`
 ```csv
 produto,quantidade,preco_unitario

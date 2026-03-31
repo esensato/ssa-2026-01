@@ -445,7 +445,7 @@ curl -LfO 'https://airflow.apache.org/docs/apache-airflow/3.1.8/docker-compose.y
 - Abrir o arquivo `docker-compose.yaml` e alterar / incluir
 ```yaml
 AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://localhost:8080/execution/'
+AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
 # incluir
 AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL: 5 
 AIRFLOW__CORE__MIN_SERIALIZED_DAG_UPDATE_INTERVAL: 5

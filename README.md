@@ -470,7 +470,7 @@ curl -LfO 'https://airflow.apache.org/docs/apache-airflow/3.1.8/airflow.sh'
 chmod +x airflow.sh
 ./airflow.sh info
 ```
-- Acesso pelo navegador na porta `8080` (pode ser necessário alterar o parâmetro `next` para `localhost:8080` quando executado do **codespace**)
+- Acesso pelo navegador na porta `8080` (se der erro remover o atributo `?next=...`)
 - Usuário e senha iniciais: `airflow` / `airflow`
 - Testando a primeira **DAG**
 ```python

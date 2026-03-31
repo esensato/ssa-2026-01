@@ -471,6 +471,7 @@ chmod +x airflow.sh
 ./airflow.sh info
 ```
 - Acesso pelo navegador na porta `8080` (pode ser necessário alterar o parâmetro `next` para `localhost:8080` quando executado do **codespace**)
+- Usuário e senha iniciais: `airflow` / `airflow`
 - Testando a primeira **DAG**
 ```python
 import pendulum

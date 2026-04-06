@@ -923,7 +923,12 @@ with DAG(
 
     get_posts >> processar
 ```
-- Exemplo `SQLCheckOperator`
+#### SQLCheckOperator
+- Instalar o *provider* para o **PostgreSQL** (por exemplo)
+```bash
+pip install apache-airflow-providers-postgres
+```
+- Código exemplo
 ```python
 import pendulum
 from airflow import DAG
@@ -948,7 +953,8 @@ with DAG(
         """
     )
 ```
-- Exemplo `PostgresOperator`
+#### PostgresOperator
+- Código exemplo
 ```python
 import pendulum
 from airflow import DAG

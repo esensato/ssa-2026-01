@@ -683,7 +683,7 @@ with DAG(
 
     task1
 ```
-#### TriggerDagRunOperator
+#### BranchPythonOperator
 - Executa um bloco ou outro de **DAGS** (tomada de decisão)
 - Conforme o retorno da função `escolhe_proxima_task` a `task3` ou a `task4` será executada
 ```python

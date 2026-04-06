@@ -496,6 +496,21 @@ with DAG(
 ```python
     task4 = BashOperator(task_id='task-4', bash_command="exit 1", retries=3)
 ```
+### Pasta para Dados
+- Criar uma nova pasta para armazenar os dados que serão processados (*datasets* como arquivos *csv*, *parket*, etc...)
+- Editar o arquivo `docker-compose.yaml` e incluir o novo volume `${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data`
+```yaml
+  volumes:
+    - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
+    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
+    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
+    - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
+    - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+```
+- Reiniciar os *containers*
+```bash
+docker-compose up -d --force-recreate 
+```
 ### Triggers de Acionamento
 - Exemplo `ONE_FAILED`
 ```python

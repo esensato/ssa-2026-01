@@ -476,7 +476,7 @@ chmod +x airflow.sh
 ```python
 import pendulum
 from airflow import DAG
-from airflow.operators.bash import BashOperator
+from airflow.providers.standard.operators.bash import BashOperator
 
 with DAG(
     dag_id="hello_dag",
@@ -501,7 +501,7 @@ with DAG(
 ```python
 import pendulum
 from airflow import DAG
-from airflow.operators.bash import BashOperator
+from airflow.providers.standard.operators.bash import BashOperator
 from airflow.utils.trigger_rule import TriggerRule
 
 with DAG(
@@ -638,6 +638,51 @@ with DAG(
     [t1, t2] >> sempre
 ```
 ### Principais Operadores
+#### TriggerDagRunOperator
+- Permite que uma **DAG** acione outra com passagem de parâmetros
+- Parâmetros podem ser enviados por meio da propriedade `conf` definda no `TriggerDagRunOperator`
+```python
+import pendulum
+from airflow import DAG
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
+
+with DAG(
+    dag_id="dag_1",
+    description="DAG 1",
+    schedule=None,
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    catchup=False,
+    tags=["dag","TriggerDagRunOperator"]
+) as dag:
+    task1 = BashOperator(task_id='task-1', bash_command="sleep 3")
+    task2 = BashOperator(task_id='task-2', bash_command="echo Acionando segunda DAG")
+    task3 = TriggerDagRunOperator(task_id='task-3', 
+                                  trigger_dag_id="dag_2", 
+                                  conf={"mensagem": "Mensagem da primeira DAG"}, 
+                                  wait_for_completion=True, 
+                                  poke_interval=5)    
+
+    task1 >> task2 >> task3
+```
+- A `dag_2` abaixo é acionada a partir da `dag_1` acima e o prâmetro acessado por meio do `dag_run.conf`
+```python
+import pendulum
+from airflow import DAG
+from airflow.providers.standard.operators.bash import BashOperator
+
+with DAG(
+    dag_id="dag_2",
+    description="DAG 2",
+    schedule=None,
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    catchup=False,
+    tags=["dag","TriggerDagRunOperator"]
+) as dag:
+    task1 = BashOperator(task_id='task-2', bash_command='echo {{ dag_run.conf["mensagem"]}}') 
+
+    task1
+```
 - Exemplo de `ShortCircuitOperator`
 ```python
 import os

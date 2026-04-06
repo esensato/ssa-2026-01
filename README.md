@@ -712,6 +712,8 @@ with DAG(
     task1 >> task2 >> [task3, task4]
 ```
 #### ShortCircuitOperator
+- Neste tipo de *operator* uma função de avaliação deve retornar `true` ou `false`
+- Caso `false` todas as `tasks` subsequentes são marcadas como **skiped*
 - Exemplo de `ShortCircuitOperator`
 ```python
 import os

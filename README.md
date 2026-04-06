@@ -511,6 +511,7 @@ with DAG(
 ```bash
 docker-compose up -d --force-recreate 
 ```
+- Os arquivos da pasta serão refernciados nas **DAGs** pelo caminho `/opt/airflow/data`
 ### Triggers de Acionamento
 - Exemplo `ONE_FAILED`
 ```python
@@ -653,6 +654,61 @@ with DAG(
     [t1, t2] >> sempre
 ```
 ### Principais Operadores
+#### PythonOperator
+- Permite executar código **Python** dentro das *tasks*
+```python
+import pendulum
+from airflow import DAG
+from airflow.providers.standard.operators.python import PythonOperator
+
+with DAG(
+    dag_id="python_operator",
+    description="python_operator",
+    schedule=None,
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    catchup=False,
+    tags=["dag","PythonOperator"]
+) as dag:
+
+    def funcao_python():
+        print("Executou com sucesso!")
+
+    task1 = PythonOperator(task_id='task-1', python_callable=funcao_python)
+   
+    task1
+```
+#### Passando Parâmetros
+- Parâmetros podem ser enviados de uma `task` para outra por meio do contexto em que as `tasks` executam
+- Para obter o contexto de execução acionar `get_current_context()`
+- O contexto de execução das `tasks` é identificado por `ti` (*task instance*)
+```python
+import pendulum
+from airflow import DAG
+from airflow.sdk import get_current_context
+from airflow.providers.standard.operators.python import PythonOperator
+
+with DAG(
+    dag_id="python_operator",
+    description="python_operator",
+    schedule=None,
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    catchup=False,
+    tags=["dag","PythonOperator"]
+) as dag:
+
+    def funcao_python_set_parametro():
+        print (get_current_context())
+        print (get_current_context()["ti"])
+        get_current_context()["ti"].xcom_push(key="mensagem", value="Mensagem por parametro")
+
+    def funcao_python_get_parametro():
+        print (get_current_context()["ti"].xcom_pull(task_ids="task-1", key="mensagem"))
+
+    task1 = PythonOperator(task_id='task-1', python_callable=funcao_python_set_parametro)
+    task2 = PythonOperator(task_id='task-2', python_callable=funcao_python_get_parametro)
+
+    task1 >> task2
+```
 #### TriggerDagRunOperator
 - Permite que uma **DAG** acione outra com passagem de parâmetros
 - Parâmetros podem ser enviados por meio da propriedade `conf` definda no `TriggerDagRunOperator`
@@ -775,7 +831,62 @@ with DAG(
 
     checar >> processar_task >> finalizar_task
 ```
-- Exemplo de `SimpleHttpOperator`
+#### Produtor e Consumidor
+- Produtor que gera um arquivo `arquivo.csv`
+```python
+import pendulum
+from airflow import DAG, Dataset
+from airflow.providers.standard.operators.python import PythonOperator
+import pandas as pd
+
+arquivo = Dataset("/opt/airflow/data/arquivo.csv")
+
+with DAG(
+    dag_id="produtor",
+    description="produtor",
+    schedule=None,
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    catchup=False,
+    tags=["dag","Dataset"]
+) as dag:
+
+    def criar_dataset():
+        ds_exemplo = {"preco": 100}
+        df = pd.DataFrame(ds_exemplo, index=[0])
+        df.to_csv("/opt/airflow/data/arquivo.csv")
+
+    task1 = PythonOperator(task_id='task-1', python_callable=criar_dataset, outlets=[arquivo])
+   
+    task1
+```
+- Consumidor que é acionado assim que o arquivo é criado / alterado
+```python
+import pendulum
+from airflow import DAG, Dataset
+from airflow.providers.standard.operators.python import PythonOperator
+import pandas as pd
+
+arquivo = Dataset("/opt/airflow/data/arquivo.csv")
+
+with DAG(
+    dag_id="consumidor",
+    description="consumidor",
+    schedule=[arquivo],
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    catchup=False,
+    tags=["dag","Dataset"]
+) as dag:
+
+    def ler_dataset():
+        ds = pd.read_csv("/opt/airflow/data/arquivo.csv")
+        print(ds)
+
+    task1 = PythonOperator(task_id='task-1', python_callable=ler_dataset)
+   
+
+    task1
+```
+#### SimpleHttpOperator
 ```python
 import pendulum
 from airflow import DAG

@@ -496,7 +496,7 @@ with DAG(
 ```python
     task4 = BashOperator(task_id='task-4', bash_command="exit 1", retries=3)
 ```
-### Triggers
+### Triggers de Acionamento
 - Exemplo `ONE_FAILED`
 ```python
 import pendulum
@@ -683,6 +683,35 @@ with DAG(
 
     task1
 ```
+#### TriggerDagRunOperator
+- Executa um bloco ou outro de **DAGS** (tomada de decisão)
+- Conforme o retorno da função `escolhe_proxima_task` a `task3` ou a `task4` será executada
+```python
+import pendulum
+from airflow import DAG
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.standard.operators.python import BranchPythonOperator
+
+with DAG(
+    dag_id="branch",
+    description="branch",
+    schedule=None,
+    start_date=pendulum.datetime(2026,1,1,tz="America/Sao_Paulo"),
+    catchup=False,
+    tags=["dag","BranchPytonOperator"]
+) as dag:
+
+    def escolhe_proxima_task():
+        return "proxima_task_1"
+
+    task1 = BashOperator(task_id='task-1', bash_command='echo Iniciando...')
+    task2 = BranchPythonOperator(task_id='branch_operator', python_callable=escolhe_proxima_task)
+    task3 = BashOperator(task_id='proxima_task_1', bash_command='echo proxima_task_1')
+    task4 = BashOperator(task_id='proxima_task_2', bash_command='echo proxima_task_2')
+
+    task1 >> task2 >> [task3, task4]
+```
+#### ShortCircuitOperator
 - Exemplo de `ShortCircuitOperator`
 ```python
 import os

@@ -995,6 +995,11 @@ with DAG(
         )
         print(df)
 
+    exibe_resultado = PythonOperator(
+        task_id="exibe_resultado",
+        python_callable=resultado_consulta
+    )
+
     pesquisar = SQLExecuteQueryOperator(
         task_id="pesquisar",
         conn_id="postgres",
@@ -1003,7 +1008,7 @@ with DAG(
         """
     )
 
-    pesquisar >> resultado_consulta
+    pesquisar >> exibe_resultado
     
 ```
 #### FileSensor

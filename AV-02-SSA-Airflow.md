@@ -6,6 +6,7 @@
 ```bash
 docker exec -it airflow-postgres-1 bash
 psql -U airflow -d airflow
+```
 - Copiar e colar os arquivos abaixo
 ```sql
 CREATE TABLE genero_musical (
@@ -16,7 +17,6 @@ CREATE TABLE genero_musical (
 CREATE TABLE descartados (
     total INTEGER NOT NULL
 );
-
 ```
 - Carregar dados na tabela
 ```sql

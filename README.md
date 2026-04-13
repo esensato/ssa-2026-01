@@ -970,7 +970,7 @@ with DAG(
         get_current_context()['ti'].xcom_push(key="total",value=10)
 
     total_venda = PythonOperator(
-        task_id="calcular_metricas",
+        task_id="total_venda",
         python_callable=calcular_total_vendas
     )
 

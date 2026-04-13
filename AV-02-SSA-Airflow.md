@@ -40,7 +40,7 @@ wget https://raw.githubusercontent.com/esensato/ssa-2026-01/refs/heads/main/dado
   - **TASK-1**: copiar o arquivo `/opt/airflow/data/dados-stream.csv` para `/opt/airflow/data/entrada.csv` (`cp /opt/airflow/data/dados-stream.csv /opt/airflow/data/entrada.csv`)
   - **TASK-2**: efetuar o tratamento de datas (deixar todas no formato *dd/mm/aaaa* - algumas estão no formato americano *aaaa-mm-dd*) e salvar a saída em um arquivo `task2.csv`
   - **TASK-3**: ler o arquivo `task2.csv` e remover as linhas onde `nome_musica` esteja vazio, gerando o arquivo `task3.csv` e passando como parâmetro para a `task` seguinte (abaixo) via variável de contexto
-  - **TASK-4**: inserir na tabela `descartados` criada acima a quantidade de registros descartados que a `task` acima passou como parâmetro
+  - **TASK-4**: inserir na tabela `descartados` criada acima a quantidade de registros descartados que a `task` acima passou como parâmetro [postgresoperator](https://github.com/esensato/ssa-2026-01/blob/main/README.md#postgresoperator)
   - **TASK-5**: enriquecer o arquivo `task3.csv` criando uma nova coluna chamada `nome_genero` que deve consistir com a tabela `genero_musical` (criada acima) com base no `id_genero` e gerar a saída `task4.csv`
   - **TASK-6**: a partir do arquivo `task4.csv` criar uma saída com a média de avaliação por música e o total de músicas ouvidas por artista (arquivos `media_avaliacao.csv` e `total_artista.csv`
 ### Entrega

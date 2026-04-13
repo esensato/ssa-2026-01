@@ -950,7 +950,7 @@ with DAG(
     )
 ```
 #### SQLExecuteQueryOperator
-- Código exemplo
+- Código exemplo para `INSERT`
 ```python
 import pendulum
 from airflow import DAG
@@ -984,6 +984,27 @@ with DAG(
     )
 
     calcular >> inserir
+```
+- Código exemplo para `SELECT`
+```python
+    def resultado_consulta():
+        resultado = get_current_context()['ti'].xcom_pull(task_ids="pesquisar")
+        df = pd.DataFrame(
+            resultado,
+            columns=["total"]
+        )
+        print(df)
+
+    pesquisar = SQLExecuteQueryOperator(
+        task_id="pesquisar",
+        conn_id="postgres",
+        sql="""
+        SELECT * FROM total_venda
+        """
+    )
+
+    pesquisar >> resultado_consulta
+    
 ```
 - Exemplo `FileSensor`
 ```python

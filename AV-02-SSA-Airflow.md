@@ -39,7 +39,7 @@ wget https://raw.githubusercontent.com/esensato/ssa-2026-01/refs/heads/main/dado
 - Sendo assim, seguir o roteiro abaixo com as *tasks* desejadas
   - **TASK-1**: copiar o arquivo `/opt/airflow/data/dados-stream.csv` para `/opt/airflow/data/entrada.csv` (`cp /opt/airflow/data/dados-stream.csv /opt/airflow/data/entrada.csv`)
   - **TASK-2**: efetuar o tratamento de datas (deixar todas no formato *dd/mm/aaaa* - algumas estão no formato americano *aaaa-mm-dd*) e salvar a saída em um arquivo `task2.csv`
-  - **TASK-3**: ler o arquivo `task2.csv` e remover as linhas onde `nome_musica` esteja vazio, gerando o arquivo `task3.csv` e passando como parâmetro para a `task` seguinte (abaixo) via variável de contexto
+  - **TASK-3**: ler o arquivo `task2.csv` e remover as linhas onde `nome_musica` esteja vazio, gerando o arquivo `task3.csv` e passando como parâmetro para a `task` seguinte (abaixo) via variável de contexto o total de linhas que foram descartadas
   - **TASK-4**: inserir na tabela `descartados` criada acima a quantidade de registros descartados que a `task` acima passou como parâmetro ([sqlexecutequeryoperator](https://github.com/esensato/ssa-2026-01/blob/main/README.md#sqlexecutequeryoperator))
   - **TASK-5**: consultar os registros da tabela `genero_musical` cujo resultado será utilizado na próxima `task` ([sqlexecutequeryoperator](https://github.com/esensato/ssa-2026-01/blob/main/README.md#sqlexecutequeryoperator))
   - **TASK-6**: enriquecer o arquivo `task3.csv` criando uma nova coluna chamada `nome_genero` que deve consistir com a tabela `genero_musical` (carregada acima) com base no `id_genero` e gerar a saída `task4.csv`

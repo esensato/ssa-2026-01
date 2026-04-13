@@ -47,6 +47,7 @@ wget https://raw.githubusercontent.com/esensato/ssa-2026-01/refs/heads/main/dado
   - **TASK-8**: a partir do arquivo `task4.csv` criar uma saída com o total de músicas ouvidas por artista e gerar o arquivo `total_artista.csv`
   - **TASK-7** e **TASK-8** devem ser exetutadas em paralelo
   - **TASK-9**: remover o arquivo `/opt/airflow/data/entrada.csv` não importando se as `tasks` **TASK-7** e **TASK-8** executaram com sucesso ou não (`rm /opt/airflow/data/entrada.csv`)
+  - **TASK-10**: não realiza nenhuma operação, apenas marca o fim do processamento
 ### Entrega
 - Subir código fonte da **DAG** criada ou link do `repo git`
   

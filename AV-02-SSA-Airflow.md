@@ -30,8 +30,9 @@ INSERT INTO genero_musical (id_genero, nome_genero) VALUES
 - Obter o arquivo para se processado
 ```bash
 cd data
-wget https://github.com/esensato/ssa-2026-01/blob/main/dados-stream.csv
+wget https://raw.githubusercontent.com/esensato/ssa-2026-01/refs/heads/main/dados-stream.csv
 ```
+- Se necessário, usar como base o [02-SSA-Pandas.ipynb](https://github.com/esensato/ssa-2026-01/blob/main/02-SSA-Pandas.ipynb) já trabalhado na aula de **pandas**
 ### Implementação
 - A equipe de análise de dados de um novo app de *stream* musical deseja montar um *pipeline* para processar um *dataset* e extrair algumas informações sobre as músicas mais solicitadas pelos seus usuários, os artitas mais requisitados e as músicas mais bem avaliadas
 - Para tanto optaram por implementar esse *pipeline* utilizando o **Airflow** para automatizar as atividades

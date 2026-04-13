@@ -512,6 +512,10 @@ with DAG(
 docker-compose up -d --force-recreate 
 ```
 - Os arquivos da pasta serão refernciados nas **DAGs** pelo caminho `/opt/airflow/data`
+- Alterar o proprietário da pasta `data`
+```bash
+sudo chown codespace:codespace data
+```
 ### Triggers de Acionamento
 - Exemplo `ONE_FAILED`
 ```python

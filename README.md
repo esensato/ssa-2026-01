@@ -924,10 +924,6 @@ with DAG(
     get_posts >> processar
 ```
 #### SQLCheckOperator
-- Instalar o *provider* para o **PostgreSQL** (por exemplo)
-```bash
-pip install apache-airflow-providers-postgres
-```
 - Código exemplo
 ```python
 import pendulum
@@ -953,26 +949,14 @@ with DAG(
         """
     )
 ```
-#### PostgresOperator
+#### SQLExecuteQueryOperator
 - Código exemplo
 ```python
 import pendulum
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.postgres.operators.postgres import PostgresOperator
-
-def calcular_metricas(**context):
-    metrics = {
-        "data_execucao": str(pendulum.now("America/Sao_Paulo")),
-        "completeness": 95.5,
-        "validity": 98.0,
-        "consistency": 92.3,
-        "uniqueness": 100.0,
-        "accuracy": 97.2,
-        "timeliness": 88.0,
-        "total_registros": 150
-    }
-    return metrics
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+from airflow.sdk import get_current_context
 
 with DAG(
     dag_id="postgres_metrics_example",
@@ -982,36 +966,20 @@ with DAG(
     tags=["postgres","metrics"]
 ) as dag:
 
-    calcular = PythonOperator(
+    def calcular_total_vendas():
+        get_current_context()['ti'].xcom_push(key="total",value=10)
+
+    total_venda = PythonOperator(
         task_id="calcular_metricas",
-        python_callable=calcular_metricas
+        python_callable=calcular_total_vendas
     )
 
-    inserir = PostgresOperator(
-        task_id="inserir_metricas",
-        postgres_conn_id="postgres_default",
+    inserir = SQLExecuteQueryOperator(
+        task_id="task4",
+        conn_id="postgres",
         sql="""
-        INSERT INTO data_quality_metrics (
-            data_execucao,
-            completeness,
-            validity,
-            consistency,
-            uniqueness,
-            accuracy,
-            timeliness,
-            integrity,
-            total_registros
-        ) VALUES (
-            '{{ ti.xcom_pull(task_ids="calcular_metricas")["data_execucao"] }}',
-            {{ ti.xcom_pull(task_ids="calcular_metricas")["completeness"] }},
-            {{ ti.xcom_pull(task_ids="calcular_metricas")["validity"] }},
-            {{ ti.xcom_pull(task_ids="calcular_metricas")["consistency"] }},
-            {{ ti.xcom_pull(task_ids="calcular_metricas")["uniqueness"] }},
-            {{ ti.xcom_pull(task_ids="calcular_metricas")["accuracy"] }},
-            {{ ti.xcom_pull(task_ids="calcular_metricas")["timeliness"] }},
-            0,
-            {{ ti.xcom_pull(task_ids="calcular_metricas")["total_registros"] }}
-        );
+        INSERT INTO total_venda (total)
+        VALUES ({{ ti.xcom_pull(task_ids='total_venda', key='total') }});
         """
     )
 

@@ -1101,3 +1101,59 @@ with DAG(
 
     task1 >> task2
 ```
+## Google Cloud BigQuery
+- Criar um projeto
+```bash
+gcloud projects create ssa-$USER
+gcloud config set project ssa-$USER
+```
+- Ativar a API do **BigQuqry**
+```bash
+gcloud services enable bigquery.googleapis.com
+```
+- Verificar a versão do cliente **BigQuery**
+```bash
+bq version
+```
+- Criar um *dataset*
+```bash
+bq mk --dataset ssa-$USER:ds_base_dados
+```
+- Criar uma tabela no *dataset*
+```bash
+bq mk --table ssa-$USER:ds_base_dados.venda_quantidade produto:STRING,quantidade:INTEGER
+```
+- Inserir dados a partir de um *CSV*
+```bash
+bq load --source_format=CSV ssa-$USER:ds_base_dados.venda_quantidade vendas.csv
+```
+- Arquivo de exemplo:
+```bash
+cat << EOF > vendas.csv
+PRD1,10
+PRD2,20
+PRD3,30
+EOF
+```
+- Consultando os dados
+```bash
+bq query --use_legacy_sql=false "SELECT * FROM \`ssa-$USER.ds_base_dados.venda_quantidade\`"
+```
+- Para visualizar a tabela e os dados pelo console basta acessar [https://console.cloud.google.com/bigquery](https://console.cloud.google.com/bigquery)
+## Google Cloud Storage
+- Associar projeto a uma *billing account* caso ainda não esteja associado
+```bash
+gcloud billing accounts list
+gcloud billing projects link ssa-$USER --billing-account=XXXXXX-XXXXXX-XXXXXX
+```
+- Tipos de *buckets*
+    - Standard: Acesso frequente
+    - Nearline: Pouco acesso (>30 dias)
+    - Coldline: Arquivo frio (>90 dias)
+    - Archive: Backup longo prazo
+- Nome do *bucket* deve ser único
+- *Bucket* é um espaço universal (global) de armazenamento de objetos
+- Criar um *bucket*
+```bash
+gcloud storage buckets create gs://ssa-${USER}-bucket-aula --location=southamerica-east1 --default-storage-class=STANDARD
+```

@@ -1156,4 +1156,57 @@ gcloud billing projects link ssa-$USER --billing-account=XXXXXX-XXXXXX-XXXXXX
 - Criar um *bucket*
 ```bash
 gcloud storage buckets create gs://ssa-${USER}-bucket-aula --location=southamerica-east1 --default-storage-class=STANDARD
+gcloud storage buckets list
+gcloud storage cp vendas.csv gs://ssa-${USER}-bucket-aula/
+gcloud storage ls gs://ssa-${USER}-bucket-aula
+gcloud storage cp gs://ssa-${USER}-bucket-aula/vendas.csv .
+gcloud storage rm gs://ssa-${USER}-bucket-aula/vendas.csv
+```
+- Acesso via aplicação
+- Instalar a dependência
+```bash
+npm install @google-cloud/storage
+```
+- Código para upload e download
+```javascript
+const { Storage } = require('@google-cloud/storage');
+
+const storage = new Storage();
+const bucketName = 'nome-do-bucket';
+
+async function main() {
+  // Upload
+  await storage.bucket(bucketName).upload('./arquivo-local.txt', {
+    destination: 'arquivo-remoto.txt',
+  });
+  console.log('Upload concluído.');
+
+  // Download
+  await storage
+    .bucket(bucketName')
+    .file('arquivo-remoto.txt')
+    .download({
+      destination: './arquivo-baixado.txt',
+    });
+
+  console.log('Download concluído.');
+}
+
+main().catch(console.error);
+```
+- Gerar a chave de acesso
+```bash
+
+PROJECT_ID=$(gcloud config get-value project)
+SA_NAME=node-storage-app
+BUCKET_NAME=gs://SEU_BUCKET
+
+gcloud storage buckets add-iam-policy-binding $BUCKET_NAME --member="serviceAccount:${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" --role="roles/storage.objectAdmin"
+
+gcloud iam service-accounts keys create key.json \
+  --iam-account=${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
+
+export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/key.json"
+
+gcloud auth application-default print-access-token
 ```

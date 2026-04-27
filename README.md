@@ -1165,38 +1165,49 @@ gcloud storage rm gs://ssa-${USER}-bucket-aula/vendas.csv
 - Acesso via aplicação
 - Instalar a dependência
 ```bash
-npm install @google-cloud/storage
+pip install google-cloud-storage
 ```
 - Código para upload e download
-```javascript
-const { Storage } = require('@google-cloud/storage');
+```python
+from google.cloud import storage
 
-const storage = new Storage();
-const bucketName = 'nome-do-bucket';
+# Nome do bucket
+bucket_name = "nome-do-bucket"
 
-async function main() {
-  // Upload
-  await storage.bucket(bucketName).upload('./arquivo-local.txt', {
-    destination: 'arquivo-remoto.txt',
-  });
-  console.log('Upload concluído.');
+# Arquivos
+local_upload_file = "./arquivo-local.txt"
+remote_file_name = "arquivo-remoto.txt"
+local_download_file = "./arquivo-baixado.txt"
 
-  // Download
-  await storage
-    .bucket(bucketName')
-    .file('arquivo-remoto.txt')
-    .download({
-      destination: './arquivo-baixado.txt',
-    });
 
-  console.log('Download concluído.');
-}
+def main():
+    # Cria cliente
+    storage_client = storage.Client()
 
-main().catch(console.error);
+    # Referência ao bucket
+    bucket = storage_client.bucket(bucket_name)
+
+    # -------------------
+    # Upload
+    # -------------------
+    blob = bucket.blob(remote_file_name)
+    blob.upload_from_filename(local_upload_file)
+
+    print("Upload concluído.")
+
+    # -------------------
+    # Download
+    # -------------------
+    blob.download_to_filename(local_download_file)
+
+    print("Download concluído.")
+
+
+if __name__ == "__main__":
+    main()
 ```
 - Gerar a chave de acesso
 ```bash
-
 PROJECT_ID=$(gcloud config get-value project)
 SA_NAME=node-storage-app
 BUCKET_NAME=gs://SEU_BUCKET
@@ -1268,6 +1279,40 @@ gcloud builds submit --tag southamerica-east1-docker.pkg.dev/ssa-$USER/cloud-run
 ```bash
 gcloud run deploy hello-python --image southamerica-east1-docker.pkg.dev/ssa-$USER/cloud-run-source-deploy/hello-python --region southamerica-east1 --allow-unauthenticated
 ```
+- Para visualizar as execuções acessar a URL [https://console.cloud.google.com/run](https://console.cloud.google.com/run)
+- Exemplo de um serviço em **python** para processar um *dataset*
+```python
+from flask import Flask, request
+from google.cloud import storage, bigquery
+import pandas as pd
+import io
+
+app = Flask(__name__)
+
+@app.route("/processar", methods=["POST"])
+def processar():
+    data = request.get_json()
+    bucket = data["bucket"]
+    file = data["file"]
+
+    storage_client = storage.Client()
+    blob = storage_client.bucket(bucket).blob(file)
+
+    csv_data = blob.download_as_bytes()
+    df = pd.read_csv(io.BytesIO(csv_data), sep=";")
+
+    df = df[df["nome_musica"].notna()]
+    df["data_execucao"] = pd.to_datetime(df["data_execucao"], errors="coerce")
+    df = df[df["data_execucao"].notna()]
+
+    client = bigquery.Client()
+    table_id = f"{client.project}.musicas.musicas_curadas"
+
+    job = client.load_table_from_dataframe(df, table_id)
+    job.result()
+
+    return {"status": "ok", "linhas": len(df)}
+```
 ## Google Cloud Workflows
 - Permite automação de tarefas e elaboração de *workflows*
 - - Habilitar a API
@@ -1305,6 +1350,7 @@ gcloud workflows executions describe EXECUTION_ID --workflow=meu-workflow --loca
 ```bash
 gcloud workflows executions list meu-workflow --location=southamerica-east1
 ```
+- Os *workflows* podem ser visualizados na URL [https://console.cloud.google.com/workflows](https://console.cloud.google.com/workflows)
 - Exemplo de *workflow* para acessar um *endpoint*
 ```yaml
 main:

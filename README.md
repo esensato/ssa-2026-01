@@ -1318,3 +1318,27 @@ main:
     - retornar:
         return: ${resposta.body}
 ```
+- Outro exemplo mais avançado para requisição do tipo *POST* com o envio de um arquivo
+```yaml
+main:
+  steps:
+
+    - iniciar:
+        assign:
+          - bucket: "meu-bucket-curso"
+          - file: "musicas/entrada.csv"
+
+    - chamar_cloud_run:
+        call: http.post
+        args:
+          url: https://SUA-URL-CLOUD-RUN/processar
+          headers:
+            Content-Type: application/json
+          body:
+            bucket: ${bucket}
+            file: ${file}
+        result: resposta
+
+    - retorno:
+        return: ${resposta.body}
+```

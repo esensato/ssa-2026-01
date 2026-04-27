@@ -1162,6 +1162,7 @@ gcloud storage ls gs://ssa-${USER}-bucket-aula
 gcloud storage cp gs://ssa-${USER}-bucket-aula/vendas.csv .
 gcloud storage rm gs://ssa-${USER}-bucket-aula/vendas.csv
 ```
+- Para visualizar os *buckets* criados pela interface web acessar o link [https://console.cloud.google.com/storage/browser](https://console.cloud.google.com/storage/browser)
 - Acesso via aplicação
 - Instalar a dependência
 ```bash

@@ -1389,3 +1389,5 @@ main:
     - retorno:
         return: ${resposta.body}
 ```
+## Google Looker
+- Acessar [https://lookerstudio.google.com](https://lookerstudio.google.com/)

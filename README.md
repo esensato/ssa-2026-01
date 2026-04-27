@@ -1203,10 +1203,118 @@ BUCKET_NAME=gs://SEU_BUCKET
 
 gcloud storage buckets add-iam-policy-binding $BUCKET_NAME --member="serviceAccount:${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com" --role="roles/storage.objectAdmin"
 
-gcloud iam service-accounts keys create key.json \
-  --iam-account=${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
+gcloud iam service-accounts keys create key.json --iam-account=${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
 
 export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/key.json"
 
 gcloud auth application-default print-access-token
+```
+## Google Cloud Run
+- Permite efetuar deploy de aplicações executadas em *containers*
+- Por exemplo, um código abaixo em **Python** (`main.py`)
+```python
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+@app.route("/", methods=["GET"])
+def hello():
+    return "Olá! Cloud Run funcionando com Python!", 200
+
+@app.route("/api", methods=["GET"])
+def api():
+    return jsonify({
+        "status": "ok",
+        "mensagem": "Cloud Run ativo"
+    })
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
+```
+- Criar um arquivo de requisitos (bibliotecas necessárias) chamado `requirements.txt`
+```javascript
+flask==3.0.0
+gunicorn==21.2.0
+```
+- Montar um arquivo `Dockerfile` para criação da imagem e *container*
+```yaml
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD exec gunicorn --bind :8080 --workers 1 --threads 8 main:app
+```
+- Habilitar a API
+```bash
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
+```
+- Criar um repositório de artefatos para armazenar a imagem do container
+```bash
+gcloud artifacts repositories create cloud-run-source-deploy --repository-format=docker --location=southamerica-east1 --description="Repositorio Docker para Cloud Run"
+
+gcloud artifacts repositories list
+```
+- Isso irá criar um repositório com uma URL `southamerica-east1-docker.pkg.dev/SEU_PROJECT_ID/cloud-run-source-deploy`
+- Criar uma imagem com base nas configurações
+```bash
+gcloud builds submit --tag southamerica-east1-docker.pkg.dev/ssa-$USER/cloud-run-source-deploy/hello-python
+```
+- Efetuar o *deploy* com base na imagem
+```bash
+gcloud run deploy hello-python --image southamerica-east1-docker.pkg.dev/ssa-$USER/cloud-run-source-deploy/hello-python --region southamerica-east1 --allow-unauthenticated
+```
+## Google Cloud Workflows
+- Permite automação de tarefas e elaboração de *workflows*
+- - Habilitar a API
+```bash
+gcloud services enable workflows.googleapis.com
+```
+- Criar um arquivo `workflow.yaml`
+```yaml
+main:
+  steps:
+    - definir_valor:
+        assign:
+          - numero: 10
+
+    - verificar:
+        switch:
+          - condition: ${numero > 5}
+            return: "Maior que 5"
+          - condition: ${numero <= 5}
+            return: "Menor ou igual a 5"
+```
+- Efetuar o *deploy*
+```bash
+gcloud workflows deploy meu-workflow --location=southamerica-east1 --source=workflow.yaml
+```
+- Executar o *workflow* e obter o **EXECUTION_ID**
+```bash
+gcloud workflows execute meu-workflow --location=southamerica-east1
+```
+- Verificar o resultado
+```bash
+gcloud workflows executions describe EXECUTION_ID --workflow=meu-workflow --location=southamerica-east1
+```
+- Verificar todas as execuções
+```bash
+gcloud workflows executions list meu-workflow --location=southamerica-east1
+```
+- Exemplo de *workflow* para acessar um *endpoint*
+```yaml
+main:
+  steps:
+    - chamar_cloud_run:
+        call: http.get
+        args:
+          url: https://SUA_URL/api
+        result: resposta
+
+    - retornar:
+        return: ${resposta.body}
 ```

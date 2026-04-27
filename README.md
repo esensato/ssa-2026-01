@@ -1101,6 +1101,8 @@ with DAG(
 
     task1 >> task2
 ```
+# Google Cloud
+- Obter créditos em: [https://vector.my.salesforce-sites.com](https://vector.my.salesforce-sites.com/GCPEDU?cid=pgj4yvN%2FbaFM63PYUnSct%2B7wEtcgZgqjiYSdp55fGoNQQBOF7WMFDL3frJjICA1J/)
 ## Google Cloud BigQuery
 - Criar um projeto
 ```bash

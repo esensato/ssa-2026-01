@@ -1384,14 +1384,10 @@ def processar():
     blob = storage_client.bucket(bucket).blob(file)
 
     csv_data = blob.download_as_bytes()
-    df = pd.read_csv(io.BytesIO(csv_data), sep=";")
-
-    df = df[df["nome_musica"].notna()]
-    df["data_execucao"] = pd.to_datetime(df["data_execucao"], errors="coerce")
-    df = df[df["data_execucao"].notna()]
+    df = pd.read_csv(io.BytesIO(csv_data))
 
     client = bigquery.Client()
-    table_id = f"{client.project}.musicas.musicas_curadas"
+    table_id = "ssa-esensato-1.ds_base_dados.venda_quantidade"
 
     job = client.load_table_from_dataframe(df, table_id)
     job.result()

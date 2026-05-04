@@ -1632,6 +1632,7 @@ main:
 ```
 ## Google Looker
 - Acessar [https://lookerstudio.google.com](https://lookerstudio.google.com/)
+- Um tutorial pode ser acessado [aqui](https://docs.cloud.google.com/data-studio/tutorial-create-a-new-report)
 ## Google Cloud Composer
 - É um **Airflow* gerenciado pelo **Google Cloud**
 - Instanciar o serviço

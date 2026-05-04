@@ -1103,6 +1103,7 @@ with DAG(
 ```
 # Google Cloud
 - Obter créditos em: [https://vector.my.salesforce-sites.com](https://vector.my.salesforce-sites.com/GCPEDU?cid=pgj4yvN%2FbaFM63PYUnSct%2B7wEtcgZgqjiYSdp55fGoNQQBOF7WMFDL3frJjICA1J/)
+- Acessar o [Google Cloud Consle](https://console.cloud.google.com/)
 ## Google Cloud BigQuery
 - Criar um projeto
 ```bash
@@ -1142,6 +1143,64 @@ EOF
 bq query --use_legacy_sql=false "SELECT * FROM \`ssa-$USER.ds_base_dados.venda_quantidade\`"
 ```
 - Para visualizar a tabela e os dados pelo console basta acessar [https://console.cloud.google.com/bigquery](https://console.cloud.google.com/bigquery)
+- Código exemplo para inserir e consultar registros na tabela (instalar o pacote `pip install google-cloud-bigquery`)
+```python
+from google.cloud import bigquery
+
+# =========================================
+# CONFIGURAÇÃO
+# =========================================
+PROJECT_ID = "ssa-esensato-1"
+DATASET_ID = "ds_base_dados"
+TABLE_ID = "venda_quantidade"
+
+TABLE_REF = f"{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}"
+
+# =========================================
+# CLIENTE
+# =========================================
+client = bigquery.Client(project=PROJECT_ID)
+
+# =========================================
+# INSERIR DADOS (INSERT)
+# =========================================
+rows_to_insert = [
+    {
+        "produto": "PRD4",
+        "quantidade": "40"
+    },
+    {
+        "produto": "PRD5",
+        "quantidade": "50"
+    },
+]
+
+errors = client.insert_rows_json(TABLE_REF, rows_to_insert)
+
+if errors:
+    print("Erro ao inserir:", errors)
+else:
+    print("Dados inseridos com sucesso!")
+
+# =========================================
+# CONSULTAR DADOS (SELECT)
+# =========================================
+query = f"""
+SELECT
+  produto,
+  quantidade
+FROM `{TABLE_REF}`
+LIMIT 10
+"""
+
+query_job = client.query(query)
+
+print("\nResultados da consulta:\n")
+
+for row in query_job:
+    print(f"Produto: {row.produto} | Quantidade: {row.quantidade}")
+```
+- Outra forma é importar um *CSV* diretamente via *dataframe*
 ## Google Cloud Storage
 - Associar projeto a uma *billing account* caso ainda não esteja associado
 ```bash
@@ -1222,6 +1281,29 @@ gcloud iam service-accounts keys create key.json --iam-account=${SA_NAME}@${PROJ
 export GOOGLE_APPLICATION_CREDENTIALS="$(pwd)/key.json"
 
 gcloud auth application-default print-access-token
+```
+- Exemplo para carregar um *dataset* no **Big Query** via um arquivo armazenado em um *bucket*
+```python
+from flask import Flask
+from google.cloud import bigquery
+import pandas as pd
+
+app = Flask(__name__)
+
+@app.route("/")
+def processar():
+    url = "gs://meu-bucket-aula/musicas.csv"
+    
+    df = pd.read_csv(url)
+    
+    client = bigquery.Client()
+    
+    table_id = "meu-projeto-aula.musicas.musicas_curadas"
+    
+    job = client.load_table_from_dataframe(df, table_id)
+    job.result()
+    
+    return "Carga realizada com sucesso!"
 ```
 ## Google Cloud Run
 - Permite efetuar deploy de aplicações executadas em *containers*
@@ -1371,7 +1453,6 @@ main:
 ```yaml
 main:
   steps:
-
     - iniciar:
         assign:
           - bucket: "meu-bucket-curso"

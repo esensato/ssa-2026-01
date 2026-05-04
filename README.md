@@ -1366,6 +1366,16 @@ gcloud run deploy hello-python --image southamerica-east1-docker.pkg.dev/ssa-$US
 ```
 - Para visualizar as execuções acessar a URL [https://console.cloud.google.com/run](https://console.cloud.google.com/run)
 - Exemplo de um serviço em **python** para processar um *dataset*
+- Criar o arquivo `requirements.txt`
+```
+flask==3.0.0
+gunicorn==21.2.0
+google-cloud-bigquery
+google-cloud-storage
+pandas
+pyarrow
+```
+- Código exemplo
 ```python
 from flask import Flask, request
 from google.cloud import storage, bigquery

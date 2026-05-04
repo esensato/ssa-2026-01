@@ -1632,3 +1632,53 @@ main:
 ```
 ## Google Looker
 - Acessar [https://lookerstudio.google.com](https://lookerstudio.google.com/)
+## Google Cloud Composer
+- É um **Airflow* gerenciado pelo **Google Cloud**
+- Instanciar o serviço
+```bash
+gcloud composer environments create meu-composer --location us-central1 --image-version composer-2-airflow-2
+```
+- Acessar o **Airflow** (procurar por `airflowUri`)
+```bash
+gcloud composer environments describe meu-composer --location us-central1
+```
+- Publicar a **DAG**
+```bash
+gcloud composer environments describe meu-composer --location us-central1 --format="value(config.dagGcsPrefix)"
+```
+- Enviar a **DAG**
+```bash
+gsutil cp hello_dag.py gs://SEU_BUCKET/dags/
+```
+- Exemplo de **DAG**
+```python
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from datetime import datetime
+
+def task_1():
+    print("Executando Task 1")
+
+def task_2():
+    print("Executando Task 2")
+
+with DAG(
+    dag_id="hello_composer",
+    start_date=datetime(2026, 1, 1),
+    schedule=None,
+    catchup=False,
+    tags=["exemplo"]
+) as dag:
+
+    t1 = PythonOperator(
+        task_id="task_1",
+        python_callable=task_1
+    )
+
+    t2 = PythonOperator(
+        task_id="task_2",
+        python_callable=task_2
+    )
+
+    t1 >> t2
+```

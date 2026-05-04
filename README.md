@@ -1400,7 +1400,9 @@ def processar():
 ```
 ## Google Cloud Workflows
 - Permite automação de tarefas e elaboração de *workflows*
-- - Habilitar a API
+- Uma referência completa da sintaxe pode ser encontrada [aqui](https://docs.cloud.google.com/workflows/docs/reference/syntax)
+- Também uma biblioteca de funções pode ser vista [aqui](https://docs.cloud.google.com/workflows/docs/reference/stdlib/overview)
+- Habilitar a API
 ```bash
 gcloud services enable workflows.googleapis.com
 ```
@@ -1408,16 +1410,23 @@ gcloud services enable workflows.googleapis.com
 ```yaml
 main:
   steps:
-    - definir_valor:
-        assign:
-          - numero: 10
+    - passo_1:
+        call: sys.log
+        args:
+          text: "Passo 1"
+    
+    - espera:
+        call: sys.sleep
+        args:
+          seconds: 2
 
-    - verificar:
-        switch:
-          - condition: ${numero > 5}
-            return: "Maior que 5"
-          - condition: ${numero <= 5}
-            return: "Menor ou igual a 5"
+    - passo_2:
+        call: sys.log
+        args:
+          text: "Passo 2"
+
+    - final:
+        return: "Fim"
 ```
 - Efetuar o *deploy*
 ```bash
@@ -1436,6 +1445,130 @@ gcloud workflows executions describe EXECUTION_ID --workflow=meu-workflow --loca
 gcloud workflows executions list meu-workflow --location=southamerica-east1
 ```
 - Os *workflows* podem ser visualizados na URL [https://console.cloud.google.com/workflows](https://console.cloud.google.com/workflows)
+- Passagem de parâmetros
+```yaml
+main:
+  params: [nome]
+  steps:
+    - saudacao:
+        return: ${"Olá, " + nome}
+```
+- Executar com passagem de parâmetros
+```bash
+gcloud workflows execute meu-workflow --data='{"nome":"Edson"}'
+```
+- Exemplo com passagem de arquivo como parâmetro
+```yaml
+main:
+  params: [input]
+  steps:
+
+    - montar_url:
+        assign:
+          - url: ${"https://storage.googleapis.com/" + input.bucket + "/" + input.arquivo}
+
+    - log_url:
+        call: sys.log
+        args:
+          text: ${"Lendo arquivo: " + url}
+
+    - ler_arquivo:
+        call: http.get
+        args:
+          url: ${url}
+        result: resposta
+
+    - mostrar_conteudo:
+        return: ${resposta.body}
+```
+- Para executar
+```bash
+gcloud workflows execute meu-workflow \
+  --data='{
+    "input": {
+      "bucket": "meu-bucket-aula",
+      "arquivo": "musicas.csv"
+    }
+  }'
+```
+- Exemplo com *if*
+```yaml
+main:
+  params: [input]
+  steps:
+
+    - verificar:
+        switch:
+          - condition: ${input.valor > 10}
+            next: maior
+
+    - menor_ou_igual:
+        return: "Valor menor ou igual a 10"
+
+    - maior:
+        return: "Valor maior que 10"
+```
+- Exemplo de tomada de decisão (*switch*)
+```yaml
+main:
+  steps:
+    - definir_valor:
+        assign:
+          - numero: 10
+
+    - verificar:
+        switch:
+          - condition: ${numero > 5}
+            return: "Maior que 5"
+          - condition: ${numero <= 5}
+            return: "Menor ou igual a 5"
+```
+- Estrutura de repetição com *for*
+```yaml
+main:
+  steps:
+
+    - init:
+        assign:
+          - lista: ["A", "B", "C"]
+
+    - loop:
+        for:
+          value: item
+          in: ${lista}
+          steps:
+            - log_item:
+                call: sys.log
+                args:
+                  text: ${"Processando item: " + item}
+
+    - final:
+        return: "Loop finalizado"
+```
+- Paralelismo com compartilhamento de valores
+```yaml
+main:
+  steps:
+    - init:
+        assign:
+          - resultados: {}
+    - paralelo:
+        parallel:
+          shared: [resultados]
+          branches:
+            - b1:
+                steps:
+                  - s1:
+                      assign:
+                        - resultados.b1: "OK - branch 1"
+            - b2:
+                steps:
+                  - s2:
+                      assign:
+                        - resultados.b2: "OK - branch 2"
+    - final:
+        return: ${resultados}
+```
 - Exemplo de *workflow* para acessar um *endpoint*
 ```yaml
 main:
@@ -1448,6 +1581,31 @@ main:
 
     - retornar:
         return: ${resposta.body}
+```
+- Tratamento de erros
+```yaml
+main:
+  steps:
+    - tentativa:
+        try:
+          steps:
+            - chamar_api:
+                call: http.get
+                args:
+                  url: https://url-invalida-erro.com
+                result: resposta
+
+            - sucesso:
+                return: "Deu certo!"
+        except:
+          as: erro
+          steps:
+            - log_erro:
+                call: sys.log
+                args:
+                  text: ${"Erro capturado: " + erro.message}
+            - retorno_erro:
+                return: ${"Falha na execução: " + erro.message}
 ```
 - Outro exemplo mais avançado para requisição do tipo *POST* com o envio de um arquivo
 ```yaml

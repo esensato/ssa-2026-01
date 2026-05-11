@@ -1636,6 +1636,48 @@ main:
     - retorno:
         return: ${resposta.body}
 ```
+#### Iniciando o WF Automaticamente
+```yaml
+main:
+  params: [event]
+  steps:
+
+    - extrair_dados:
+        assign:
+          - bucket: ${event.data.bucket}
+          - arquivo: ${event.data.name}
+
+    - log:
+        call: sys.log
+        args:
+          text: ${"Arquivo recebido: gs://" + bucket + "/" + arquivo}
+
+    - chamar_cloud_run:
+        call: http.post
+        args:
+          url: https://URL_DO_CLOUD_RUN
+          body:
+            bucket: ${bucket}
+            arquivo: ${arquivo}
+        result: resposta
+
+    - final:
+        return: ${resposta.body}
+```
+- Registrar o evento
+```bash
+gcloud eventarc triggers create trigger-csv \
+  --location=us-central1 \
+  --destination-workflow=pipeline-streaming \
+  --destination-workflow-location=us-central1 \
+  --event-filters="type=google.cloud.storage.object.v1.finalized" \
+  --event-filters="bucket=bucket-self-service" \
+  --service-account=SEU_SERVICE_ACCOUNT
+```
+- Para testar
+```bash
+gsutil cp musicas_streaming.csv gs://bucket-self-service/
+```
 ## Google Looker
 - Acessar [https://lookerstudio.google.com](https://lookerstudio.google.com/)
 - Um tutorial pode ser acessado [aqui](https://docs.cloud.google.com/data-studio/tutorial-create-a-new-report)

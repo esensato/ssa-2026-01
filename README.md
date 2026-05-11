@@ -1454,10 +1454,10 @@ gcloud workflows executions list meu-workflow --location=southamerica-east1
 - Passagem de parâmetros
 ```yaml
 main:
-  params: [nome]
+  params: [param]
   steps:
     - saudacao:
-        return: ${"Olá, " + nome}
+        return: ${"Olá, " + param.nome}
 ```
 - Executar com passagem de parâmetros
 ```bash

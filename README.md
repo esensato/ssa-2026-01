@@ -1461,7 +1461,7 @@ main:
 ```
 - Executar com passagem de parâmetros
 ```bash
-gcloud workflows execute meu-workflow --data='{"nome":"Edson"}'
+gcloud workflows execute meu-workflow --data='{"nome":"Edson"}' --location=southamerica-east1 
 ```
 - Exemplo com passagem de arquivo como parâmetro
 ```yaml

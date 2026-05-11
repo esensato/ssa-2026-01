@@ -1489,13 +1489,7 @@ main:
 ```
 - Para executar
 ```bash
-gcloud workflows execute meu-workflow \
-  --data='{
-    "input": {
-      "bucket": "meu-bucket-aula",
-      "arquivo": "musicas.csv"
-    }
-  }'
+gcloud workflows execute meu-workflow --data='{"bucket": "meu-bucket-aula", "arquivo": "musicas.csv"}' --location=southamerica-east1
 ```
 - Exemplo com *if*
 ```yaml

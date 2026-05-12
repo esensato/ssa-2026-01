@@ -1623,6 +1623,11 @@ main:
         return: ${resposta.body}
 ```
 #### Iniciando o WF Automaticamente
+- Obter o **service account**
+```bash
+gcloud iam service-accounts list --format="value(email)"
+```
+- Implementar WF
 ```yaml
 main:
   params: [event]
@@ -1657,7 +1662,8 @@ gcloud eventarc triggers create trigger-csv \
   --destination-workflow=upload \
   --destination-workflow-location=southamerica-east1 \
   --event-filters="type=google.cloud.storage.object.v1.finalized" \
-  --event-filters="bucket=ssa-esensato-1-bucket-aula" 
+  --event-filters="bucket=ssa-esensato-1-bucket-aula" \
+  --service-account=
 ```
 - Para testar
 ```bash

@@ -1468,22 +1468,18 @@ gcloud workflows execute meu-workflow --data='{"nome":"Edson"}' --location=south
 main:
   params: [input]
   steps:
-
     - montar_url:
         assign:
           - url: ${"https://storage.googleapis.com/" + input.bucket + "/" + input.arquivo}
-
     - log_url:
         call: sys.log
         args:
           text: ${"Lendo arquivo: " + url}
-
     - ler_arquivo:
         call: http.get
         args:
           url: ${url}
         result: resposta
-
     - mostrar_conteudo:
         return: ${resposta.body}
 ```
@@ -1515,7 +1511,6 @@ main:
     - definir_valor:
         assign:
           - numero: 10
-
     - verificar:
         switch:
           - condition: ${numero > 5}
@@ -1527,11 +1522,9 @@ main:
 ```yaml
 main:
   steps:
-
     - init:
         assign:
           - lista: ["A", "B", "C"]
-
     - loop:
         for:
           value: item
@@ -1541,7 +1534,6 @@ main:
                 call: sys.log
                 args:
                   text: ${"Processando item: " + item}
-
     - final:
         return: "Loop finalizado"
 ```
@@ -1661,16 +1653,15 @@ main:
 - Registrar o evento
 ```bash
 gcloud eventarc triggers create trigger-csv \
-  --location=us-central1 \
-  --destination-workflow=pipeline-streaming \
-  --destination-workflow-location=us-central1 \
+  --location=southamerica-east1 \
+  --destination-workflow=upload \
+  --destination-workflow-location=southamerica-east1 \
   --event-filters="type=google.cloud.storage.object.v1.finalized" \
-  --event-filters="bucket=bucket-self-service" \
-  --service-account=SEU_SERVICE_ACCOUNT
+  --event-filters="bucket=ssa-esensato-1-bucket-aula" 
 ```
 - Para testar
 ```bash
-gsutil cp musicas_streaming.csv gs://bucket-self-service/
+gsutil cp musicas_streaming.csv gs://ssa-esensato-1-bucket-aula/
 ```
 ## Google Looker
 - Acessar [https://lookerstudio.google.com](https://lookerstudio.google.com/)

@@ -1268,6 +1268,25 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+- Exemplo para salvar um *dataframe* (`df`) em um arquivo `novo_arquivo.csv` dentro de um *bucket* `meu_bucket`
+```python
+    blob = storage_client.bucket("meu_bucket").blob("novo_arquivo.csv")
+
+    # Converte o DataFrame em CSV em memória
+    csv_buffer = io.StringIO()
+    df.to_csv(
+        csv_buffer,
+        sep=";",          # mesmo separador usado no seu arquivo
+        index=False,      # não grava o índice do DataFrame
+        encoding="utf-8"
+    )
+
+    # Faz upload do conteúdo para o bucket
+    blob.upload_from_string(
+        csv_buffer.getvalue(),
+        content_type="text/csv"
+    )
+```
 - Gerar a chave de acesso
 ```bash
 PROJECT_ID=$(gcloud config get-value project)
